@@ -13,10 +13,10 @@ The data in the data set was extracted from images of genuine and forged banknot
 ## Environment Setup & Dependencies
 
 Required Python libraries:
-* matplotlob.pyplot
-* pandas
-* numpy
-* sklearn
+* matplotlib (3.2.1)
+* pandas (1.0.4)
+* numpy (1.18.4)
+* sklearn (0.0)
 
 ## Step-by-step Instructions for Model Usage
 
