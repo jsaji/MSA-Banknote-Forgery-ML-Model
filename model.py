@@ -86,4 +86,25 @@ class ForgeryDetector():
         print(test_Y.describe())
         '''
 
+        SVM_Model = svm.SVC(gamma='auto',kernel="linear").fit(train_X, train_Y)
+
+        z = lambda x,y: (-SVM_Model.intercept_[0]-SVM_Model.coef_[0][0]*x-SVM_Model.coef_[0][1]*y) / SVM_Model.coef_[0][2]
+
+        tmp = np.linspace(round(min(test_X.min(axis=1))),2,round(max(test_X.max(axis=1))))
+        x,y = np.meshgrid(tmp,tmp)
+
+        # Plot stuff.
+        fig = graph.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.plot_surface(x, y, z(x,y))
+        scatter = ax.scatter(test_X['variance'], test_X['curtosis'], test_X['skewness'], c=test_Y)
+        ax.set_xlabel('variance')
+        ax.set_ylabel('curtosis')
+        ax.set_zlabel('skewness')
+        #ax.plot3D(X[Y==0,0], X[Y==0,1], X[Y==0,2],'ob')
+        #ax.plot3D(X[Y==1,0], X[Y==1,1], X[Y==1,2],'sr')
+        graph.show()
+
+
+
 
