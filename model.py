@@ -13,9 +13,9 @@ class ForgeryDetector():
     """
     Defines a support vector machine (SVM) to analyze data from scanned banknotes to determine if they're legitimate or forged
     """
-    def __init__(self, filename, header, train_split=0.8):
+    def __init__(self, filename, header=None, train_split=0.6):
         try:
-            data_set = pd.read_csv(filename, header=header)
+            data_set = pd.read_csv(filename, header=header, skip_blank_lines=True)
             data_set.columns = ['variance', 'curtosis', 'skewness', 'entropy', 'is_forged']
             self.data_set = data_set
             self.svm_model = None
@@ -33,35 +33,51 @@ class ForgeryDetector():
         graph.grid()
         graph.show()
 
-    def plot_three_features(self, feature_1, feature_2, feature_3):
+    def plot_three_features(self, features, plot_all=True, test_x=None, pred_y=None, accuracy=None):
         """Plots any three features of the data set using their column name"""
         fig = graph.figure()
         ax = fig.add_subplot(111, projection='3d')
-        scatter = ax.scatter(self.data_set[feature_1], self.data_set[feature_2], self.data_set[feature_3], c=self.data_set['is_forged'])
-        ax.set_xlabel(feature_1)
-        ax.set_ylabel(feature_2)
-        ax.set_zlabel(feature_3)
+        title = 'Classification Plot using ' + features[0] + ', ' + features[1] + ' & ' + features[2]
+        if plot_all:
+            # Plots all data
+            scatter = ax.scatter(self.data_set[features[0]], self.data_set[features[1]], self.data_set[features[2]], c=self.data_set['is_forged'])
+            title += ' (all data)'
+        else:
+            # Plots test data if chosen to do so
+            # Plots the SVM hyperplane by reconstructing its algebraic form
+            z = lambda x, y: (-self.svm_model.intercept_[0]-self.svm_model.coef_[0][0]*x-self.svm_model.coef_[0][1]*y) / self.svm_model.coef_[0][2]
+            tmp = [round(min(test_x.min(axis=1))), round(max(test_x.max(axis=1)))]
+            x, y = np.meshgrid(tmp, tmp)
+            ax.plot_surface(x, y, z(x, y), alpha=0.6)
+            
+            # Plots the test data
+            scatter = ax.scatter(test_x[features[0]], test_x[features[1]], test_x[features[2]], c=pred_y)
+            title += ' (test data)\nAccuracy: {:.2%}'.format(accuracy)
+
+        ax.set_xlabel(features[0])
+        ax.set_ylabel(features[1])
+        ax.set_zlabel(features[2])
         graph.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'])
-        graph.title('Classification Plot using ' + feature_1 + ', ' + feature_2 + ' & ' + feature_3 + ' (all data)')
+        graph.title(title)
         graph.show()
 
     def plot_all(self, plot_pairs=False):
         """Plots all pairs/triplets of features
         to show that variance, curtosis and skewnewss form the best set of features to train the SVM"""
 
-        # Plots all pair combinations of features
+        # Plots all pair combinations of features (avoids duplicate combinations)
         if (plot_pairs):
             for i in range(len(self.data_set.columns)):
                 for j in range(i+1, len(self.data_set.columns), 1):
                     self.plot_two_features(self.data_set.columns[i], self.data_set.columns[j])
         # Plotting pairs of features does not provide a conclusive set of features to train the Ml model with
 
-        # Plots all triplet combinations of features
+        # Plots all triplet combinations of features (avoids duplicate combinations)
         num_features = len(self.data_set.columns) - 1
         for i in range(num_features):
             for j in range(i + 1, num_features, 1):
-                for k in range(j + 1,num_features, 1):
-                    self.plot_three_features(self.data_set.columns[i], self.data_set.columns[j],self.data_set.columns[k])
+                for k in range(j + 1, num_features, 1):
+                    self.plot_three_features([self.data_set.columns[i], self.data_set.columns[j],self.data_set.columns[k]])
         # The most promising combination is variance, curtosis and skewness
         # as it has distinctive separation between forged/not forged banknotes
         
@@ -88,24 +104,8 @@ class ForgeryDetector():
             print("SVM Accuracy: {:.2%}".format(accuracy))
 
             # If desired, the test data can be visualised alongside the SVM hyperplane
-            if (display_test):
-                fig = graph.figure()
-                ax = fig.add_subplot(111, projection='3d')
-
-                # Plots the SVM hyperplane by reconstructing its algebraic form
-                z = lambda x, y: (-self.svm_model.intercept_[0]-self.svm_model.coef_[0][0]*x-self.svm_model.coef_[0][1]*y) / self.svm_model.coef_[0][2]
-                tmp = [round(min(test_x.min(axis=1))), round(max(test_x.max(axis=1)))]
-                x, y = np.meshgrid(tmp, tmp)
-                ax.plot_surface(x, y, z(x, y), alpha=0.6)
-                
-                # Plots the test data
-                scatter = ax.scatter(test_x['variance'], test_x['curtosis'], test_x['skewness'], c=test_y)
-                ax.set_xlabel('variance')
-                ax.set_ylabel('curtosis')
-                ax.set_zlabel('skewness')
-                graph.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'])
-                graph.title('Classification plot using variance, curtosis and skewness (test data)\nAccuracy: {:.2%}'.format(accuracy))
-                graph.show()
+            if display_test:
+                self.plot_three_features(["variance", "curtosis", "skewness"], False, test_x, pred_y, accuracy)
                 
         except Exception as err:
             raise err
