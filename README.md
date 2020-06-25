@@ -35,10 +35,10 @@ The minimum requirement is the file name of the data set to be used in training 
 It is expected that that data set consists of 5 columns (variance, curtosis, skewness, entropy, is_forged) and multiple rows.
 
 When initialising the ForgeryDetector object, by default:
-* it is assumed that the data does not have headers but has all 5 columns previously mentioned, in alphabetical order. If it does have headers, pass the argument 'header' into the model constructor e.g. ```model = ForgeryDetector('Resources/banknote_data.txt', header=0)```. The data set does not need the columns to be ordered if it has headers as it will be done automatically.
-* the data set is split into training and testing data sets, using 50% (proportion of 0.5) for training and 50% (proportion of 0.5) for testing. If desired, this can be changed by passing the argument 'train_split' into the model constructor with the desired proportion e.g. ```model = ForgeryDetector('Resources/banknote_data.txt', train_split=0.8)``` trains the model using 80% (proportion of 0.8) of the data set and tests the model using 20% (proportion of 0.2).
+* if the data set does not have headers, it is assumed that it has all 5 columns previously mentioned, in alphabetical order. If it does have headers, pass the argument ```header``` as 0 into the model constructor e.g. ```model = ForgeryDetector('Resources/banknote_data.txt', header=0)```. The data set does not need the columns to be ordered if it has headers as it will be done automatically.
+* the data set is split into training and testing data sets, using 50% (proportion of 0.5) for training and 50% (proportion of 0.5) for testing. If desired, this can be changed by passing the argument ```train_split``` into the model constructor with the desired proportion e.g. ```model = ForgeryDetector('Resources/banknote_data.txt', train_split=0.8)``` trains the model using 80% (proportion of 0.8) of the data set and tests the model using 20% (proportion of 0.2).
 
-The features of the data set can be visualised in pairs and/or triplets by calling ```model.plot_all()```. By default, the features are visualised in triplets, but pairs of features can be visualised by adding 'plot_pairs' to the method call e.g. ```model.plot_all(plot_pairs=True)```. These visualisation were what deemed the use of the featurse curtosis, skewness and variance to train the model (this triplet had the greatest distinction between forged and not forged).
+The features of the data set can be visualised in pairs and/or triplets by calling ```model.plot_all()```. By default, the features are visualised in triplets, but pairs of features can be visualised by adding ```plot_pairs``` equal to True to the method call e.g. ```model.plot_all(plot_pairs=True)```. These visualisation were what deemed the use of the featurse curtosis, skewness and variance to train the model (this triplet had the greatest distinction between forged and not forged).
 
 Example usage of the ForgeryDetector object can be found in ```main.py```.
 
@@ -46,11 +46,11 @@ Example usage of the ForgeryDetector object can be found in ```main.py```.
 
 The model can be trained & tested simply by initialising the ForgeryDetector object and calling its train_and_test method e.g. ```model.train_and_test()```. 
 
-Using the training data (determined by train_split), the model is trained and then the test data is used to test the model and its accuracy. By default, a 3D scatter plot is displayed, showing the SVM's hyperplane that classifies the data points as forged or not forged and the model's accuracy. A normalised confusion matrix is also displayed, to show which data points were correctly classified and which were not as a percentage. Testing the model can be skipped if desired e.g. ```model.train_and_test(test=False)```.
+Using the training data (determined by ```train_split```), the model is trained and then the test data is used to test the model and its accuracy. By default, a 3D scatter plot is displayed, showing the SVM's hyperplane that classifies the data points as forged or not forged and the model's accuracy. A normalised confusion matrix is also displayed, to show which data points were correctly classified and which were not as a percentage. Testing the model can be skipped if desired e.g. ```model.train_and_test(test=False)```.
 
 ### Predicting Classes
 
-The purpose of the ForgeryDetector object is to be able to classify whether a banknote was forged or not (to a certain degree of accuracy). After training and testing, further data can be passed into the 'predict' method of the object (e.g. ```results = model.predict(test_data)```), returning an array of predicted results e.g. ```[0, 1]``` indicates the first banknote (first row) is not forged and the second banknote (second row) is forged.
+The purpose of the ForgeryDetector object is to be able to classify whether a banknote was forged or not (to a certain degree of accuracy). After training and testing, further data can be passed into the ```predict``` method of the object (e.g. ```results = model.predict(test_data)```), returning an array of predicted results e.g. ```[0, 1]``` indicates the first banknote (first row) is not forged and the second banknote (second row) is forged.
 
 The test data can be:
 * an array of arrays (e.g. ```test_data = [[3.62, 8.66, -2.80], [-2.83, -6.63, 10.48]]```). If the test data is an array of arrays, it is assumed that the columns are  curtosis, skewness and variance, in this order.

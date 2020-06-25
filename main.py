@@ -3,7 +3,7 @@ main.py
 Used for creating, running and utilising the ForgeryDetector ML object
 '''
 import pandas as pd
-from model import ForgeryDetector
+from models import ForgeryDetector
 try:
     model = ForgeryDetector('Resources/banknote_data.txt', header=0, train_split=0.5)
     #model.plot_all()
