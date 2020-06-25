@@ -1,14 +1,14 @@
 """
-model.py
+models.py
 Defines models used in the project
 """
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as graph
+from matplotlib import cm
 from sklearn import svm, metrics
 from sklearn.model_selection import train_test_split
-
 
 class ForgeryDetector():
     """
@@ -67,14 +67,15 @@ class ForgeryDetector():
             # Sets the x, y points of the corners of the displayed hyperplane for visualisation
             x, y = np.meshgrid(limits, limits)
             ax = fig.add_subplot(121, projection='3d')
-            ax.plot_surface(x, y, z(x, y), alpha=0.3, color='g')
+            ax.plot_surface(x, y, z(x, y), alpha=0.5, color='b')
             # Plots the test data
             scatter = ax.scatter(test_data[0][features[0]], test_data[0][features[1]], test_data[0][features[2]], c=pred_y)
             accuracy = metrics.accuracy_score(test_data[1], pred_y)
-            ax.set_title('Classification Plot (test data) - SVM Accuracy: {:.2%}'.format(accuracy))
+            ax.set_title('Classification Plot (test data)')
+            title += ' - SVM Accuracy: {:.2%}'.format(accuracy)
             # Plots a normalised confusion matrix
             cnf_matrix = metrics.plot_confusion_matrix(self.svm_model, test_data[0], test_data[1], display_labels=['not forged', 'forged'],
-                            normalize='true', ax=fig.add_subplot(122))
+                            normalize='true', ax=fig.add_subplot(122), cmap=graph.cm.Blues)
             cnf_matrix.ax_.set_title('Normalized Confusion Matrix')
             
         ax.set_xlabel(features[0])
