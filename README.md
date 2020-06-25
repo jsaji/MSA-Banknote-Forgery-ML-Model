@@ -43,13 +43,13 @@ The minimum requirement is the file name of the data set to be used in training 
 It is expected that that data set consists of 5 columns (curtosis, entropy, is_forged, skewness, variance) and multiple rows.
 
 When initialising the ForgeryDetector object, by default:
-* if the data set does not have headers, it is assumed that it has all 5 columns previously mentioned, in alphabetical order. If it does have headers, pass the argument ```header=0``` into the model constructor e.g. ```model = ForgeryDetector('banknote_data.txt', header=0)```. The data set does not need the columns to be ordered if it has headers as it will be done automatically.
+* if the data set does not have headers, it is assumed that it has all 5 columns previously mentioned, in the same order (alphabetical). If it does have headers, pass the argument ```header=0``` into the model constructor e.g. ```model = ForgeryDetector('banknote_data.txt', header=0)```. The data set does not need the columns to be ordered if it has headers as it will be done automatically.
 * the data set is split into training and testing data sets, using 50% (proportion of 0.5) for training and 50% (proportion of 0.5) for testing. If desired, this can be changed by passing the argument ```train_split``` into the model constructor with the desired proportion e.g. ```model = ForgeryDetector('banknote_data.txt', train_split=0.8)``` trains the model using 80% (proportion of 0.8) of the data set and tests the model using 20% (proportion of 0.2).
 
 The features of the data set can be visualised in pairs and/or triplets by calling ```model.plot_all()```. By default, the features are visualised in triplets, but pairs of features can be visualised by adding ```plot_pairs``` equal to True to the method call e.g. ```model.plot_all(plot_pairs=True)```. These visualisation were what deemed the use of the featurse curtosis, skewness and variance to train the model (this triplet had the greatest distinction between forged and not forged). 
 
 **Helpful tips:**
-* Example usage of the ForgeryDetector object can be found in ```main.py```.
+* Example usage of the ForgeryDetector object can be found and [run](https://docs.python.org/3/faq/windows.html) in ```main.py```.
 * To zoom in & out of the various plots, right-click, hold and drag to adjust the zoom.
 
 ### Training & Testing
