@@ -2,7 +2,7 @@
 
 ## Project Idea
 
-This project is aimed at using machine learning via a supervised learning model (support vector machines) to classify whether a banknote is authentic or forged. Each banknote has 5 attributes:
+This project is aimed at using machine learning via a supervised learning model (support vector machine) to classify whether a banknote is authentic or forged. Each banknote has 5 attributes:
 1. Variance of Wavelet Transformed image (continuous)
 2. Skewness of Wavelet Transformed image (continuous)
 3. Curtosis of Wavelet Transformed image (continuous)
@@ -14,6 +14,9 @@ The model itself classifies a banknote's class based on 3 attributes, curtosis, 
 The data in the data set was extracted from images of genuine and forged banknotes, using the Wavelet Transform tool. The original data set is from the UCI Machine Learning Repository and can be found [here](https://archive.ics.uci.edu/ml/datasets/banknote+authentication#).
 
 The machine learning model was built using Python, and encapsulated by an object, ForgeryDetector, complete with methods that allows training, testing, data visualisation and predicting classes of data.
+
+## Background on Support Vector Machines
+Support vector machines (SVMs) were the machine learning model of choice because of their prevalent use in classification problems, a high degree of accuracy and requiring less computational power. SVMs attempt to find an N-dimensional hyperplane, where N is the number of features, that classifies data points (e.g. points on either side of the hyperplane are a part of different classes). The hyperplane is influenced by support vectors (i.e. points close to the hyperplane), attempting to maximise the distance between data points in the different classes.
 
 ## Environment Setup & Dependencies
 

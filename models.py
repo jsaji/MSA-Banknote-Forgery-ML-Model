@@ -21,7 +21,7 @@ class ForgeryDetector():
             self.load_data_set(filename, header)
             self.train_split = train_split
             # Sets default window size for plot displays
-            plot.rcParams["figure.figsize"] = (11, 6)
+            plot.rcParams['figure.figsize'] = (11, 6)
         except Exception as err:
             raise err
 
@@ -39,6 +39,7 @@ class ForgeryDetector():
         self.data_set = data_set
         # Resets svm model when loading a new data set
         self.svm_model = None
+        print('New data set loaded (SVM requires training)')
 
     def plot_two_features(self, features):
         """Plots any two features of the data set using the features' column names"""
@@ -58,7 +59,7 @@ class ForgeryDetector():
         if plot_all:
             ax = fig.add_subplot(111, projection='3d')
             scatter = ax.scatter(self.data_set[features[0]], self.data_set[features[1]], self.data_set[features[2]], c=self.data_set['is_forged'])
-            ax.set_title('Classification Plot (all data)')
+            ax.set_title('Classification Plot (All Data)')
         else:
             # Plots the SVM hyperplane by reconstructing its algebraic form in terms of z
             # a*x + b*y + c*z + d = 0 -> z = (-d - a*x - b*y)/c
@@ -67,22 +68,25 @@ class ForgeryDetector():
             # Sets the x, y points of the corners of the displayed hyperplane for visualisation
             x, y = np.meshgrid(limits, limits)
             ax = fig.add_subplot(121, projection='3d')
-            ax.plot_surface(x, y, z(x, y), alpha=0.5, color='b')
+            ax.plot_surface(x, y, z(x, y), alpha=0.6, color='b')
             # Plots the test data
-            pred_y = self.predict(test_data[0])
-            scatter = ax.scatter(test_data[0][features[0]], test_data[0][features[1]], test_data[0][features[2]], c=pred_y)
-            accuracy = metrics.accuracy_score(test_data[1], pred_y)
-            ax.set_title('Classification Plot (test data)')
-            title += ' - SVM Accuracy: {:.2%}'.format(accuracy)
+            y_pred = self.predict(test_data[0])
+            scatter = ax.scatter(test_data[0][features[0]], test_data[0][features[1]], test_data[0][features[2]], c=y_pred)
+            accuracy = metrics.accuracy_score(test_data[1], y_pred)
+            ax.set_title('Classification Plot (Test Data)')
+            
             # Plots a normalised confusion matrix
             cnf_matrix = metrics.plot_confusion_matrix(self.svm_model, test_data[0], test_data[1], display_labels=['not forged', 'forged'],
                             normalize='true', ax=fig.add_subplot(122), cmap=cm.cmap_d['Blues'])
             cnf_matrix.ax_.set_title('Normalized Confusion Matrix')
+
+            title += ' - SVM Accuracy: {:.2%}'.format(accuracy)
+            print('Testing completed (SVM accuracy: {:.2%})'.format(accuracy))
             
         ax.set_xlabel(features[0])
         ax.set_ylabel(features[1])
         ax.set_zlabel(features[2])
-        ax.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'], loc="lower right")
+        ax.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'], loc='lower right')
         fig.suptitle(title)
         fig.tight_layout()
         plot.show()
@@ -121,9 +125,10 @@ class ForgeryDetector():
             '''
             # Trains the SVM using a linear kernel
             self.svm_model = svm.SVC(kernel='linear').fit(x_train, y_train)
+            print('Training completed')
             # If desired, the SVM can be tested and the results can be visualised
             if test:
-                self.plot_three_features(["curtosis", "skewness", "variance"], plot_all=False, test_data=[x_test, y_test])
+                self.plot_three_features(['curtosis', 'skewness', 'variance'], plot_all=False, test_data=[x_test, y_test])
                 
         except Exception as err:
             raise err
@@ -137,9 +142,11 @@ class ForgeryDetector():
                 if (isinstance(test_data, pd.DataFrame) and isinstance(test_data.columns[0], str)):
                     test_data.columns = map(str.lower, test_data.columns)
                     test_data = test_data.reindex(sorted(test_data.columns), axis=1)
-                    test_data = test_data[["curtosis", "skewness", "variance"]]
-                return self.svm_model.predict(test_data)
+                    test_data = test_data[['curtosis', 'skewness', 'variance']]
+                results = self.svm_model.predict(test_data)
+                print('Data classified')
+                return results
             else:
-                raise Exception("The SVM Model has not been trained")
+                raise Exception('The SVM Model has not been trained')
         except Exception as err:
             raise err
