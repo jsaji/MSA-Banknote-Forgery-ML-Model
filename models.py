@@ -59,7 +59,7 @@ class ForgeryDetector():
         if plot_all:
             ax = fig.add_subplot(111, projection='3d')
             scatter = ax.scatter(self.data_set[features[0]], self.data_set[features[1]], self.data_set[features[2]], c=self.data_set['is_forged'], marker='D')
-            ax.set_title('Classification Plot (All Data)')
+            ax.set_title('Classification Plot')
         else:
             x_test, y_test = test_data
             # Plots the SVM hyperplane on a scatter plot by reconstructing its algebraic form in terms of z
@@ -75,7 +75,7 @@ class ForgeryDetector():
             y_pred = self.predict(x_test)
             scatter = ax.scatter(x_test[features[0]], x_test[features[1]], x_test[features[2]], c=y_pred, marker='D')
             accuracy = metrics.accuracy_score(y_test, y_pred)
-            ax.set_title('Classification Plot (Test Data)')
+            ax.set_title('Classification Plot (Test Data) with SVM Hyperplane')
             
             # Plots a normalised confusion matrix
             cnf_matrix = metrics.plot_confusion_matrix(self.svm_model, x_test, y_test, display_labels=['not forged', 'forged'],
