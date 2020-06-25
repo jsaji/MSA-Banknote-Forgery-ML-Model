@@ -19,6 +19,8 @@ class ForgeryDetector():
             self.svm_model = None
             self.data_set = None
             self.load_data_set(filename, header)
+            if (train_split <= 0 or train_split >= 1):
+                raise Exception('train_split must be a value between 0 and 1 (non-inclusive)')
             self.train_split = train_split
             # Sets default window size for plot displays
             plot.rcParams['figure.figsize'] = (11, 6)
