@@ -51,6 +51,7 @@ The features of the data set can be visualised in pairs and/or triplets by calli
 **Helpful tips:**
 * Example usage of the ForgeryDetector object can be found and [run](https://docs.python.org/3/faq/windows.html) in ```main.py```.
 * To zoom in & out of the various plots, right-click, hold and drag to adjust the zoom.
+* To proceed to the next plot display after calling ```.plot_all()```, close the window so the next can appear.
 
 ### Training & Testing
 
