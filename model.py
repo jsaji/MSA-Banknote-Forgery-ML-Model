@@ -16,9 +16,9 @@ class ForgeryDetector():
     """
     def __init__(self, filename, header=None, train_split=0.5):
         try:
+            self.svm_model = None
             self.data_set = None
             self.load_data_set(filename, header)
-            self.svm_model = None
             self.train_split = train_split
             # Sets default window size for plot displays
             graph.rcParams["figure.figsize"] = (11, 6)
@@ -37,9 +37,11 @@ class ForgeryDetector():
         # Alphabetically sorts data set columns by their name
         data_set = data_set.reindex(sorted(data_set.columns), axis=1)
         self.data_set = data_set
+        # Resets svm model when loading a new data set
+        self.svm_model = None
 
     def plot_two_features(self, features):
-        """Plots any two features of the data set using their column name"""
+        """Plots any two features of the data set using the features' column names"""
         scatter = graph.scatter(self.data_set[features[0]], self.data_set[features[1]], c=self.data_set['is_forged'], marker='D')
         graph.xlabel(features[0])
         graph.ylabel(features[1])
@@ -48,7 +50,7 @@ class ForgeryDetector():
         graph.show()
 
     def plot_three_features(self, features, plot_all=True, test_data=None, pred_y=None):
-        """Plots any three features of the data set using their column name
+        """Plots any three features of the data set using the features' column names
         Can also plot test data, predicted results and accuracy of SVM if plot_all is False"""
         fig = graph.figure()
         title = 'Data Visualisations'
@@ -84,7 +86,7 @@ class ForgeryDetector():
         graph.show()
 
     def plot_all(self, plot_pairs=False):
-        """Plots all pairs/triplets of features
+        """Plots all triplets of features - set plot_pairs to True to plot pairs of features
         to show variance, curtosis & skewnewss form the best set of features to train the SVM"""
         # Plots all pair combinations of features (avoids duplicate combinations)
         if plot_pairs:
@@ -126,15 +128,15 @@ class ForgeryDetector():
             raise err
 
     def predict(self, test_data):
-        """Returns array of predicted results, 1 if forged, 0 if not forged based on data provided
-        test_data (2d array or DataFrame) must have 3 columns, curtosis, skewness and variance, in this (alphabetical) order, and must have at least 1 row"""
+        """Returns array of predicted results, 1 if forged, 0 if not forged based on data provided"""
         try:
             if self.svm_model is not None:
-                # If test data is a DataFrame and has headers (of string type), order the columns
+                # If test data is a DataFrame and has headers (of string type), order the columns and drop unnecessary ones
                 # if test_data is not a DataFrame, it is assumed that the columns are ordered as required
-                if (isinstance(test_data, pd.DataFrame) and isinstance(test_data.columns, str)):
+                if (isinstance(test_data, pd.DataFrame) and isinstance(test_data.columns[0], str)):
                     test_data.columns = map(str.lower, test_data.columns)
                     test_data = test_data.reindex(sorted(test_data.columns), axis=1)
+                    test_data = test_data[["curtosis", "skewness", "variance"]]
                 return self.svm_model.predict(test_data)
             else:
                 raise Exception("The SVM Model has not been trained")
