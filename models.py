@@ -5,7 +5,7 @@ Defines models used in the project
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as graph
+import matplotlib.pyplot as plot
 from matplotlib import cm
 from sklearn import svm, metrics
 from sklearn.model_selection import train_test_split
@@ -21,7 +21,7 @@ class ForgeryDetector():
             self.load_data_set(filename, header)
             self.train_split = train_split
             # Sets default window size for plot displays
-            graph.rcParams["figure.figsize"] = (11, 6)
+            plot.rcParams["figure.figsize"] = (11, 6)
         except Exception as err:
             raise err
 
@@ -42,17 +42,17 @@ class ForgeryDetector():
 
     def plot_two_features(self, features):
         """Plots any two features of the data set using the features' column names"""
-        scatter = graph.scatter(self.data_set[features[0]], self.data_set[features[1]], c=self.data_set['is_forged'], marker='D')
-        graph.xlabel(features[0])
-        graph.ylabel(features[1])
-        graph.title('Classification Plot')
-        graph.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'])
-        graph.show()
+        scatter = plot.scatter(self.data_set[features[0]], self.data_set[features[1]], c=self.data_set['is_forged'], marker='D')
+        plot.xlabel(features[0])
+        plot.ylabel(features[1])
+        plot.title('Classification Plot')
+        plot.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'])
+        plot.show()
 
-    def plot_three_features(self, features, plot_all=True, test_data=None, pred_y=None):
+    def plot_three_features(self, features, plot_all=True, test_data=None):
         """Plots any three features of the data set using the features' column names
         Can also plot test data, predicted results and accuracy of SVM if plot_all is False"""
-        fig = graph.figure()
+        fig = plot.figure()
         title = 'Data Visualisations'
         # Plots all data or test data if chosen to do so
         if plot_all:
@@ -69,13 +69,14 @@ class ForgeryDetector():
             ax = fig.add_subplot(121, projection='3d')
             ax.plot_surface(x, y, z(x, y), alpha=0.5, color='b')
             # Plots the test data
+            pred_y = self.predict(test_data[0])
             scatter = ax.scatter(test_data[0][features[0]], test_data[0][features[1]], test_data[0][features[2]], c=pred_y)
             accuracy = metrics.accuracy_score(test_data[1], pred_y)
             ax.set_title('Classification Plot (test data)')
             title += ' - SVM Accuracy: {:.2%}'.format(accuracy)
             # Plots a normalised confusion matrix
             cnf_matrix = metrics.plot_confusion_matrix(self.svm_model, test_data[0], test_data[1], display_labels=['not forged', 'forged'],
-                            normalize='true', ax=fig.add_subplot(122), cmap=graph.cm.Blues)
+                            normalize='true', ax=fig.add_subplot(122), cmap=cm.Blues)
             cnf_matrix.ax_.set_title('Normalized Confusion Matrix')
             
         ax.set_xlabel(features[0])
@@ -84,7 +85,7 @@ class ForgeryDetector():
         ax.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'], loc="lower right")
         fig.suptitle(title)
         fig.tight_layout()
-        graph.show()
+        plot.show()
 
     def plot_all(self, plot_pairs=False):
         """Plots all triplets of features - set plot_pairs to True to plot pairs of features
@@ -122,8 +123,7 @@ class ForgeryDetector():
             self.svm_model = svm.SVC(kernel='linear').fit(x_train, y_train)
             # If desired, the SVM can be tested and the results can be visualised
             if test:
-                pred_y = self.predict(x_test)
-                self.plot_three_features(["curtosis", "skewness", "variance"], plot_all=False, test_data=[x_test, y_test], pred_y=pred_y)
+                self.plot_three_features(["curtosis", "skewness", "variance"], plot_all=False, test_data=[x_test, y_test])
                 
         except Exception as err:
             raise err

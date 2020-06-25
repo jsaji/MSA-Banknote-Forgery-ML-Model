@@ -67,4 +67,4 @@ The primary methods that can be used:
 
 It is recommended to use ```plot_all()``` and avoid using:
 * ```plot_two_features(self, features)``` - plots any two features of the data set using the features' column names
-* ```plot_three_features(self, features, plot_all=True, test_data=None, pred_y=None)``` - plots any three features of the data set using the features' column names, it can also plot test data, predicted results and accuracy of SVM if ```plot_all``` is False
+* ```plot_three_features(self, features, plot_all=True, test_data=None)``` - plots any three features of the data set using the features' column names, it can also plot test data, predicted results and accuracy of SVM if ```plot_all``` is False and test data is provided
