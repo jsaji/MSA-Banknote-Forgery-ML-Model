@@ -13,13 +13,15 @@ class ForgeryDetector():
     """
     Defines a support vector machine (SVM) to analyze data from scanned banknotes to determine if they're legitimate or forged
     """
-    def __init__(self, filename, header=None, train_split=0.6):
+    def __init__(self, filename, header=None, train_split=0.5):
         try:
             data_set = pd.read_csv(filename, header=header, skip_blank_lines=True)
             data_set.columns = ['variance', 'curtosis', 'skewness', 'entropy', 'is_forged']
             self.data_set = data_set
             self.svm_model = None
             self.train_split = train_split
+            # Sets default window size for plot displays
+            graph.rcParams["figure.figsize"] = (11, 6)
         except Exception as err:
             raise err
 
@@ -28,40 +30,47 @@ class ForgeryDetector():
         scatter = graph.scatter(self.data_set[features[0]], self.data_set[features[1]], c=self.data_set['is_forged'], marker='D')
         graph.xlabel(features[0])
         graph.ylabel(features[1])
-        graph.title('Classification Plot using ' + features[0] + ' & ' + features[1])
+        graph.title('Classification Plot')
         graph.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'])
-        graph.grid()
         graph.show()
 
-    def plot_three_features(self, features, plot_all=True, test_x=None, pred_y=None, accuracy=None):
+    def plot_three_features(self, features, plot_all=True, test_data=None, pred_y=None, accuracy=None):
         """Plots any three features of the data set using their column name
         Can also plot test data, predicted results and accuracy of SVM if plot_all is set to False"""
         fig = graph.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        title = 'Classification Plot using ' + features[0] + ', ' + features[1] + ' & ' + features[2]
+        title = 'Data Visualisations'
+        scatter_title = 'Classification Plot'
+        # Plots all data or test data if chosen to do so
         if plot_all:
-            # Plots all data
+            
+            ax = fig.add_subplot(111, projection='3d')
             scatter = ax.scatter(self.data_set[features[0]], self.data_set[features[1]], self.data_set[features[2]], c=self.data_set['is_forged'])
-            title += ' (all data)'
+            ax.set_title(scatter_title + ' (all data)')
         else:
-            # Plots test data if chosen to do so
             # Plots the SVM hyperplane by reconstructing its algebraic form in terms of z
             # a*x + b*y + c*z + d = 0 -> z = (-d - a*x - b*y)/c
             z = lambda x, y: (-self.svm_model.intercept_[0]-self.svm_model.coef_[0][0]*x-self.svm_model.coef_[0][1]*y) / self.svm_model.coef_[0][2]
-            tmp = [round(min(test_x.min(axis=1))), round(max(test_x.max(axis=1)))]
-            # Sets the (x,y) points of the corners of the displayed hyperplane for visualisation
-            x, y = np.meshgrid(tmp, tmp)
-            ax.plot_surface(x, y, z(x, y), alpha=0.6)
-            
+            limits = [round(min(test_data[0].min(axis=1)))-1, round(max(test_data[0].max(axis=1)))+1]
+            # Sets the x, y points of the corners of the displayed hyperplane for visualisation
+            x, y = np.meshgrid(limits, limits)
+            ax = fig.add_subplot(121, projection='3d')
+            ax.plot_surface(x, y, z(x, y), alpha=0.3, color='g')
             # Plots the test data
-            scatter = ax.scatter(test_x[features[0]], test_x[features[1]], test_x[features[2]], c=pred_y)
-            title += ' (test data)\nAccuracy: {:.2%}'.format(accuracy)
-
+            accuracy = metrics.accuracy_score(test_data[1], pred_y)
+            scatter = ax.scatter(test_data[0][features[0]], test_data[0][features[1]], test_data[0][features[2]], c=pred_y)
+            ax.set_title(scatter_title + ' (test data)')
+            title += ' - SVM Accuracy: {:.2%}'.format(accuracy)
+            # Plots a normalised confusion matrix
+            cnf_matrix = metrics.plot_confusion_matrix(self.svm_model, test_data[0], test_data[1], display_labels=['not forged', 'forged'],
+                normalize='true', ax=fig.add_subplot(122))
+            cnf_matrix.ax_.set_title('Normalized confusion matrix')
+            
         ax.set_xlabel(features[0])
         ax.set_ylabel(features[1])
         ax.set_zlabel(features[2])
-        graph.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'])
-        graph.title(title)
+        ax.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'], loc="lower right")
+        fig.suptitle(title)
+        fig.tight_layout()
         graph.show()
 
     def plot_all(self, plot_pairs=False):
@@ -82,8 +91,8 @@ class ForgeryDetector():
                     self.plot_three_features([self.data_set.columns[i], self.data_set.columns[j], self.data_set.columns[k]])
         # The most promising combination is variance, curtosis and skewness
         # as it has distinctive separation between forged/not forged banknotes
-        
-    def train_and_test(self, display_test=True):
+
+    def train_and_test(self, test=True):
         """Trains the SVM with provided data set and trains it to determine its accuracy"""
         try:
             # Splits data set into training and test sets
@@ -99,15 +108,11 @@ class ForgeryDetector():
             '''
             # Trains the SVM using a linear kernel
             self.svm_model = svm.SVC(kernel='linear').fit(train_x, train_y)
-
-            # Tests the SVM by comparing test data and the SVM's prediction
-            pred_y = self.predict(test_x)
-            accuracy = metrics.accuracy_score(test_y, pred_y)
-            print("SVM Accuracy: {:.2%}".format(accuracy))
-
-            # If desired, the test data can be visualised alongside the SVM hyperplane
-            if display_test:
-                self.plot_three_features(["variance", "curtosis", "skewness"], False, test_x, pred_y, accuracy)
+            
+            # If desired, the SVM can be tested and the results can be visualised
+            if test:
+                pred_y = self.predict(test_x)
+                self.plot_three_features(["variance", "curtosis", "skewness"], plot_all=False, test_data=[test_x, test_y], pred_y=pred_y)
                 
         except Exception as err:
             raise err
