@@ -130,6 +130,11 @@ class ForgeryDetector():
         test_data (2d array or DataFrame) must have 3 columns, curtosis, skewness and variance, in this (alphabetical) order, and must have at least 1 row"""
         try:
             if self.svm_model is not None:
+                # If test data is a DataFrame and has headers (of string type), order the columns
+                # if test_data is not a DataFrame, it is assumed that the columns are ordered as required
+                if (isinstance(test_data, pd.DataFrame) and isinstance(test_data.columns, str)):
+                    test_data.columns = map(str.lower, test_data.columns)
+                    test_data = test_data.reindex(sorted(test_data.columns), axis=1)
                 return self.svm_model.predict(test_data)
             else:
                 raise Exception("The SVM Model has not been trained")
