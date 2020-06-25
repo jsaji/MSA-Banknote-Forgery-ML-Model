@@ -30,7 +30,8 @@ class ForgeryDetector():
         data_set = pd.read_csv(filename, header=header, skip_blank_lines=True)
         # If the data set does not have headers, set them, if it does, make them lowercase
         if header is None:
-            data_set.columns = ['variance', 'curtosis', 'skewness', 'entropy', 'is_forged']
+            # For a data set without headers, the columns are assumed to be in order
+            data_set.columns = ['curtosis', 'entropy', 'is_forged', 'skewness', 'variance']
         else:
             data_set.columns = map(str.lower, data_set.columns)
         # Alphabetically sorts data set columns by their name
@@ -116,7 +117,6 @@ class ForgeryDetector():
             '''
             # Trains the SVM using a linear kernel
             self.svm_model = svm.SVC(kernel='linear').fit(x_train, y_train)
-            
             # If desired, the SVM can be tested and the results can be visualised
             if test:
                 pred_y = self.predict(x_test)
