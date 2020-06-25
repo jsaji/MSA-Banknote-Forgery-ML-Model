@@ -9,21 +9,33 @@ import matplotlib.pyplot as graph
 from sklearn import svm, metrics
 from sklearn.model_selection import train_test_split
 
+
 class ForgeryDetector():
     """
     Defines a support vector machine (SVM) to analyze data from scanned banknotes to determine if they're legitimate or forged
     """
     def __init__(self, filename, header=None, train_split=0.5):
         try:
-            data_set = pd.read_csv(filename, header=header, skip_blank_lines=True)
-            data_set.columns = ['variance', 'curtosis', 'skewness', 'entropy', 'is_forged']
-            self.data_set = data_set
+            self.data_set = None
+            self.load_data_set(filename, header)
             self.svm_model = None
             self.train_split = train_split
             # Sets default window size for plot displays
             graph.rcParams["figure.figsize"] = (11, 6)
         except Exception as err:
             raise err
+
+    def load_data_set(self, filename, header):
+        """Loads a data set and configures it for use"""
+        data_set = pd.read_csv(filename, header=header, skip_blank_lines=True)
+        # If the data set does not have headers, set them, if it does, make them lowercase
+        if header is None:
+            data_set.columns = ['variance', 'curtosis', 'skewness', 'entropy', 'is_forged']
+        else:
+            data_set.columns = map(str.lower, data_set.columns)
+        # Alphabetically sorts data set columns by their name
+        data_set = data_set.reindex(sorted(data_set.columns), axis=1)
+        self.data_set = data_set
 
     def plot_two_features(self, features):
         """Plots any two features of the data set using their column name"""
@@ -34,18 +46,16 @@ class ForgeryDetector():
         graph.legend(handles=scatter.legend_elements()[0], labels=['not forged', 'forged'])
         graph.show()
 
-    def plot_three_features(self, features, plot_all=True, test_data=None, pred_y=None, accuracy=None):
+    def plot_three_features(self, features, plot_all=True, test_data=None, pred_y=None):
         """Plots any three features of the data set using their column name
-        Can also plot test data, predicted results and accuracy of SVM if plot_all is set to False"""
+        Can also plot test data, predicted results and accuracy of SVM if plot_all is False"""
         fig = graph.figure()
         title = 'Data Visualisations'
-        scatter_title = 'Classification Plot'
         # Plots all data or test data if chosen to do so
         if plot_all:
-            
             ax = fig.add_subplot(111, projection='3d')
             scatter = ax.scatter(self.data_set[features[0]], self.data_set[features[1]], self.data_set[features[2]], c=self.data_set['is_forged'])
-            ax.set_title(scatter_title + ' (all data)')
+            ax.set_title('Classification Plot (all data)')
         else:
             # Plots the SVM hyperplane by reconstructing its algebraic form in terms of z
             # a*x + b*y + c*z + d = 0 -> z = (-d - a*x - b*y)/c
@@ -56,14 +66,13 @@ class ForgeryDetector():
             ax = fig.add_subplot(121, projection='3d')
             ax.plot_surface(x, y, z(x, y), alpha=0.3, color='g')
             # Plots the test data
-            accuracy = metrics.accuracy_score(test_data[1], pred_y)
             scatter = ax.scatter(test_data[0][features[0]], test_data[0][features[1]], test_data[0][features[2]], c=pred_y)
-            ax.set_title(scatter_title + ' (test data)')
-            title += ' - SVM Accuracy: {:.2%}'.format(accuracy)
+            accuracy = metrics.accuracy_score(test_data[1], pred_y)
+            ax.set_title('Classification Plot (test data) - SVM Accuracy: {:.2%}'.format(accuracy))
             # Plots a normalised confusion matrix
             cnf_matrix = metrics.plot_confusion_matrix(self.svm_model, test_data[0], test_data[1], display_labels=['not forged', 'forged'],
-                normalize='true', ax=fig.add_subplot(122))
-            cnf_matrix.ax_.set_title('Normalized confusion matrix')
+                            normalize='true', ax=fig.add_subplot(122))
+            cnf_matrix.ax_.set_title('Normalized Confusion Matrix')
             
         ax.set_xlabel(features[0])
         ax.set_ylabel(features[1])
@@ -98,28 +107,27 @@ class ForgeryDetector():
             # Splits data set into training and test sets
             features = self.data_set.drop(['entropy', 'is_forged'], 1)
             result = self.data_set['is_forged']
-            train_x, test_x, train_y, test_y = train_test_split(features, result, train_size=self.train_split, random_state=42)
+            x_train, x_test, y_train, y_test = train_test_split(features, result, train_size=self.train_split, random_state=42)
             '''
-            print(train_x.describe())
-            print(train_y.describe())
-
-            print(test_x.describe())
-            print(test_y.describe())
+            print(x_train.describe())
+            print(y_train.describe())
+            print(x_test.describe())
+            print(y_test.describe())
             '''
             # Trains the SVM using a linear kernel
-            self.svm_model = svm.SVC(kernel='linear').fit(train_x, train_y)
+            self.svm_model = svm.SVC(kernel='linear').fit(x_train, y_train)
             
             # If desired, the SVM can be tested and the results can be visualised
             if test:
-                pred_y = self.predict(test_x)
-                self.plot_three_features(["variance", "curtosis", "skewness"], plot_all=False, test_data=[test_x, test_y], pred_y=pred_y)
+                pred_y = self.predict(x_test)
+                self.plot_three_features(["curtosis", "skewness", "variance"], plot_all=False, test_data=[x_test, y_test], pred_y=pred_y)
                 
         except Exception as err:
             raise err
 
     def predict(self, test_data):
         """Returns array of predicted results, 1 if forged, 0 if not forged based on data provided
-        test_data (type 2d array or DataFrame) must have 3 columns, variance, curtosis and skewness, in this order, and must have at least 1 row"""
+        test_data (2d array or DataFrame) must have 3 columns, curtosis, skewness and variance, in this (alphabetical) order, and must have at least 1 row"""
         try:
             if self.svm_model is not None:
                 return self.svm_model.predict(test_data)
