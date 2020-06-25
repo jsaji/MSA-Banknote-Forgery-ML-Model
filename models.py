@@ -39,7 +39,7 @@ class ForgeryDetector():
         self.data_set = data_set
         # Resets svm model when loading a new data set
         self.svm_model = None
-        print('Data set from file \'{}\' was loaded (SVM requires training)'.format(filename))
+        print('Data set from file \'{}\' loaded (SVM requires training)'.format(filename))
 
     def plot_two_features(self, features):
         """Plots any two features of the data set using the features' column names"""
@@ -55,34 +55,37 @@ class ForgeryDetector():
         Can also plot test data, predicted results and accuracy of SVM if plot_all is False"""
         fig = plot.figure()
         title = 'Data Visualisations'
-        # Plots all data or test data if chosen to do so
+        # Plots all data on a scatter plot or test data if chosen to do so
         if plot_all:
             ax = fig.add_subplot(111, projection='3d')
-            scatter = ax.scatter(self.data_set[features[0]], self.data_set[features[1]], self.data_set[features[2]], c=self.data_set['is_forged'])
+            scatter = ax.scatter(self.data_set[features[0]], self.data_set[features[1]], self.data_set[features[2]], c=self.data_set['is_forged'], marker='D')
             ax.set_title('Classification Plot (All Data)')
         else:
-            # Plots the SVM hyperplane by reconstructing its algebraic form in terms of z
+            x_test, y_test = test_data
+            # Plots the SVM hyperplane on a scatter plot by reconstructing its algebraic form in terms of z
             # a*x + b*y + c*z + d = 0 -> z = (-d - a*x - b*y)/c
             z = lambda x, y: (-self.svm_model.intercept_[0]-self.svm_model.coef_[0][0]*x-self.svm_model.coef_[0][1]*y) / self.svm_model.coef_[0][2]
-            limits = [round(min(test_data[0].min(axis=1)))-1, round(max(test_data[0].max(axis=1)))+1]
-            # Sets the x, y points of the corners of the displayed hyperplane for visualisation
+            limits = [round(min(x_test.min(axis=1)))-1, round(max(x_test.max(axis=1)))+1]
+            # Sets the x, y points of the corners of the hyperplane visualisation
             x, y = np.meshgrid(limits, limits)
             ax = fig.add_subplot(121, projection='3d')
             ax.plot_surface(x, y, z(x, y), alpha=0.6, color='b')
-            # Plots the test data
-            y_pred = self.predict(test_data[0])
-            scatter = ax.scatter(test_data[0][features[0]], test_data[0][features[1]], test_data[0][features[2]], c=y_pred)
-            accuracy = metrics.accuracy_score(test_data[1], y_pred)
+
+            # Plots the test data on a scatter plot
+            y_pred = self.predict(x_test)
+            scatter = ax.scatter(x_test[features[0]], x_test[features[1]], x_test[features[2]], c=y_pred, marker='D')
+            accuracy = metrics.accuracy_score(y_test, y_pred)
             ax.set_title('Classification Plot (Test Data)')
             
             # Plots a normalised confusion matrix
-            cnf_matrix = metrics.plot_confusion_matrix(self.svm_model, test_data[0], test_data[1], display_labels=['not forged', 'forged'],
+            cnf_matrix = metrics.plot_confusion_matrix(self.svm_model, x_test, y_test, display_labels=['not forged', 'forged'],
                             normalize='true', ax=fig.add_subplot(122), cmap=cm.cmap_d['Blues'])
             cnf_matrix.ax_.set_title('Normalized Confusion Matrix')
 
             title += ' - SVM Accuracy: {:.2%}'.format(accuracy)
             print('Testing completed (SVM accuracy: {:.2%})'.format(accuracy))
-            
+
+        # Sets the axis labels, legend and title of plots    
         ax.set_xlabel(features[0])
         ax.set_ylabel(features[1])
         ax.set_zlabel(features[2])
@@ -94,41 +97,44 @@ class ForgeryDetector():
     def plot_all(self, plot_pairs=False):
         """Plots all triplets of features - set plot_pairs to True to plot pairs of features
         to show variance, curtosis & skewnewss form the best set of features to train the SVM"""
+        
+        features = self.data_set.drop(['is_forged'], axis=1)
+        num_features = len(features.columns)
+
         # Plots all pair combinations of features (avoids duplicate combinations)
         if plot_pairs:
-            for i in range(len(self.data_set.columns)):
-                for j in range(i+1, len(self.data_set.columns), 1):
-                    self.plot_two_features([self.data_set.columns[i], self.data_set.columns[j]])
-        # Plotting pairs of features does not provide a conclusive set of features to train the Ml model with
+            for i in range(num_features):
+                for j in range(i+1, len(num_features), 1):
+                    self.plot_two_features([features.columns[i], features.columns[j]])
+        # Plotting pairs of features does not provide a conclusive set of features to train the SVM model
 
         # Plots all triplet combinations of features (avoids duplicate combinations)
-        num_features = len(self.data_set.columns) - 1
         for i in range(num_features):
             for j in range(i + 1, num_features, 1):
                 for k in range(j + 1, num_features, 1):
-                    self.plot_three_features([self.data_set.columns[i], self.data_set.columns[j], self.data_set.columns[k]])
+                    self.plot_three_features([features.columns[i], features.columns[j], features.columns[k]])
         # The most promising combination is variance, curtosis and skewness
-        # as it has distinctive separation between forged/not forged banknotes
+        # as it has distinctive classification between forged/not forged banknotes
 
     def train_and_test(self, test=True):
         """Trains the SVM with provided data set and trains it to determine its accuracy"""
         try:
-            # Splits data set into training and test sets
+            # Splits data set into train and test sets
             features = self.data_set[['curtosis', 'skewness', 'variance']]
             result = self.data_set['is_forged']
-            x_train, x_test, y_train, y_test = train_test_split(features, result, train_size=self.train_split, random_state=42)
+            x_train, x_test, y_train, y_test = train_test_split(features, result, train_size=self.train_split)
             '''
             print(x_train.describe())
             print(y_train.describe())
             print(x_test.describe())
             print(y_test.describe())
             '''
-            # Trains the SVM using a linear kernel
+            # Trains the SVM using a linear kernel (to obtain linear hyperplane)
             self.svm_model = svm.SVC(kernel='linear').fit(x_train, y_train)
             print('Training completed')
             # If desired, the SVM can be tested and the results can be visualised
             if test:
-                self.plot_three_features(['curtosis', 'skewness', 'variance'], plot_all=False, test_data=[x_test, y_test])
+                self.plot_three_features(features.columns, plot_all=False, test_data=[x_test, y_test])
                 
         except Exception as err:
             raise err
