@@ -1,8 +1,8 @@
-# Banknote Forgery Detector (using machine learning) - MSA 2020
+# Banknote Forgery Detector (MSA 2020)
 
 ## Project Idea
 
-This project is aimed at using machine learning via a supervised learning model (support vector machine) to classify whether a banknote is authentic or forged. Each banknote has 5 attributes:
+The project aims to use machine learning via a supervised learning model (support vector machine) to classify whether a banknote is authentic or forged. Each banknote has 5 attributes:
 1. Variance of Wavelet Transformed image (continuous)
 2. Skewness of Wavelet Transformed image (continuous)
 3. Curtosis of Wavelet Transformed image (continuous)
@@ -13,9 +13,10 @@ The model itself classifies a banknote's class based on 3 attributes, curtosis, 
 
 The data in the data set was extracted from images of genuine and forged banknotes, using the Wavelet Transform tool. The original data set is from the UCI Machine Learning Repository and can be found [here](https://archive.ics.uci.edu/ml/datasets/banknote+authentication#).
 
-The machine learning model was built using Python, and encapsulated by an object, ForgeryDetector, complete with methods that allows training, testing, data visualisation and predicting classes of data.
+The machine learning model was built using Python, and encapsulated by an object, ForgeryDetector, complete with methods that allow training, testing, data visualisation and predicting the classes of data points.
 
 ## Background on Support Vector Machines
+
 Support vector machines (SVMs) were the machine learning model of choice because of their prevalent use in classification problems, a high degree of accuracy and requiring less computational power. SVMs attempt to find an N-dimensional hyperplane, where N is the number of features, that classifies data points (e.g. points on either side of the hyperplane are a part of different classes). The hyperplane is influenced by support vectors (i.e. points close to the hyperplane), attempting to maximise the distance between data points in the different classes.
 
 ## Environment Setup & Dependencies
@@ -36,14 +37,14 @@ For more information, refer to their respective documentation.
 
 ## Instructions for Using the Model
 
-The machine learning model is simple to use. It is encapsulated by the ForgeryDector object (defined in ```models.py```), and can be initialised by calling ```model = ForgeryDetector('Resources/banknote_data.txt')```.
+The machine learning model is simple to use. It is encapsulated by the ForgeryDector object (defined in ```models.py```), and can be initialised by calling ```model = ForgeryDetector('banknote_data.txt')```.
 
-The minimum requirement is the file name of the data set to be used in training and testing the model. A data set is provided (```Resources/banknote_data.txt```). 
-It is expected that that data set consists of 5 columns (variance, curtosis, skewness, entropy, is_forged) and multiple rows.
+The minimum requirement is the file name of the data set to be used in training and testing the model. A data set is provided (```banknote_data.txt```). 
+It is expected that that data set consists of 5 columns (curtosis, entropy, is_forged, skewness, variance) and multiple rows.
 
 When initialising the ForgeryDetector object, by default:
-* if the data set does not have headers, it is assumed that it has all 5 columns previously mentioned, in alphabetical order. If it does have headers, pass the argument ```header``` as 0 into the model constructor e.g. ```model = ForgeryDetector('Resources/banknote_data.txt', header=0)```. The data set does not need the columns to be ordered if it has headers as it will be done automatically.
-* the data set is split into training and testing data sets, using 50% (proportion of 0.5) for training and 50% (proportion of 0.5) for testing. If desired, this can be changed by passing the argument ```train_split``` into the model constructor with the desired proportion e.g. ```model = ForgeryDetector('Resources/banknote_data.txt', train_split=0.8)``` trains the model using 80% (proportion of 0.8) of the data set and tests the model using 20% (proportion of 0.2).
+* if the data set does not have headers, it is assumed that it has all 5 columns previously mentioned, in alphabetical order. If it does have headers, pass the argument ```header=0``` into the model constructor e.g. ```model = ForgeryDetector('banknote_data.txt', header=0)```. The data set does not need the columns to be ordered if it has headers as it will be done automatically.
+* the data set is split into training and testing data sets, using 50% (proportion of 0.5) for training and 50% (proportion of 0.5) for testing. If desired, this can be changed by passing the argument ```train_split``` into the model constructor with the desired proportion e.g. ```model = ForgeryDetector('banknote_data.txt', train_split=0.8)``` trains the model using 80% (proportion of 0.8) of the data set and tests the model using 20% (proportion of 0.2).
 
 The features of the data set can be visualised in pairs and/or triplets by calling ```model.plot_all()```. By default, the features are visualised in triplets, but pairs of features can be visualised by adding ```plot_pairs``` equal to True to the method call e.g. ```model.plot_all(plot_pairs=True)```. These visualisation were what deemed the use of the featurse curtosis, skewness and variance to train the model (this triplet had the greatest distinction between forged and not forged). 
 

@@ -39,7 +39,7 @@ class ForgeryDetector():
         self.data_set = data_set
         # Resets svm model when loading a new data set
         self.svm_model = None
-        print('New data set loaded (SVM requires training)')
+        print('Data set from file \'{}\' was loaded (SVM requires training)'.format(filename))
 
     def plot_two_features(self, features):
         """Plots any two features of the data set using the features' column names"""
@@ -114,7 +114,7 @@ class ForgeryDetector():
         """Trains the SVM with provided data set and trains it to determine its accuracy"""
         try:
             # Splits data set into training and test sets
-            features = self.data_set.drop(['entropy', 'is_forged'], 1)
+            features = self.data_set[['curtosis', 'skewness', 'variance']]
             result = self.data_set['is_forged']
             x_train, x_test, y_train, y_test = train_test_split(features, result, train_size=self.train_split, random_state=42)
             '''
@@ -144,7 +144,7 @@ class ForgeryDetector():
                     test_data = test_data.reindex(sorted(test_data.columns), axis=1)
                     test_data = test_data[['curtosis', 'skewness', 'variance']]
                 results = self.svm_model.predict(test_data)
-                print('Data classified')
+                print('Data points classified')
                 return results
             else:
                 raise Exception('The SVM Model has not been trained')
