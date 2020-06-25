@@ -76,7 +76,7 @@ class ForgeryDetector():
             title += ' - SVM Accuracy: {:.2%}'.format(accuracy)
             # Plots a normalised confusion matrix
             cnf_matrix = metrics.plot_confusion_matrix(self.svm_model, test_data[0], test_data[1], display_labels=['not forged', 'forged'],
-                            normalize='true', ax=fig.add_subplot(122), cmap=cm.Blues)
+                            normalize='true', ax=fig.add_subplot(122), cmap=cm.cmap_d['Blues'])
             cnf_matrix.ax_.set_title('Normalized Confusion Matrix')
             
         ax.set_xlabel(features[0])

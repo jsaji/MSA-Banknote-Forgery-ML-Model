@@ -17,15 +17,19 @@ The machine learning model was built using Python, and encapsulated by an object
 
 ## Environment Setup & Dependencies
 
-Any Python version 3.0 and above is compatible, but Python 3.8.x is recommended and can be installed from [here](https://www.python.org/downloads/).
+Python 3.6.1 and above are compatible, but Python 3.8.x is recommended and can be installed from [here](https://www.python.org/downloads/).
 
-Required Python libraries:
-* [Matplotlib](https://matplotlib.org/) (3.2.1)
-* [NumPy](https://numpy.org/) (1.18.4)
-* [pandas](https://pandas.pydata.org/) (1.0.4)
-* [scikit-learn](https://scikit-learn.org/stable/) (0.0)
+Required Python libraries (and their pip install commands):
+* [Matplotlib](https://matplotlib.org/) (3.2.1 and above)
+  * ```pip install matplotlib```
+* [NumPy](https://numpy.org/) (1.18.4 and above)
+  * ```pip install numpy```
+* [pandas](https://pandas.pydata.org/) (1.0.4 and above)
+  * ```pip install pandas```
+* [scikit-learn](https://scikit-learn.org/stable/) (0.0 and above)
+  * ```pip install sklearn```
 
-These can be installed using pip. For more information, refer to their respective documentation.
+For more information, refer to their respective documentation.
 
 ## Instructions for Using the Model
 
