@@ -38,9 +38,11 @@ When initialising the ForgeryDetector object, by default:
 * if the data set does not have headers, it is assumed that it has all 5 columns previously mentioned, in alphabetical order. If it does have headers, pass the argument ```header``` as 0 into the model constructor e.g. ```model = ForgeryDetector('Resources/banknote_data.txt', header=0)```. The data set does not need the columns to be ordered if it has headers as it will be done automatically.
 * the data set is split into training and testing data sets, using 50% (proportion of 0.5) for training and 50% (proportion of 0.5) for testing. If desired, this can be changed by passing the argument ```train_split``` into the model constructor with the desired proportion e.g. ```model = ForgeryDetector('Resources/banknote_data.txt', train_split=0.8)``` trains the model using 80% (proportion of 0.8) of the data set and tests the model using 20% (proportion of 0.2).
 
-The features of the data set can be visualised in pairs and/or triplets by calling ```model.plot_all()```. By default, the features are visualised in triplets, but pairs of features can be visualised by adding ```plot_pairs``` equal to True to the method call e.g. ```model.plot_all(plot_pairs=True)```. These visualisation were what deemed the use of the featurse curtosis, skewness and variance to train the model (this triplet had the greatest distinction between forged and not forged). To zoom in & out of the various plots, right-click, hold and drag to adjust the zoom.
+The features of the data set can be visualised in pairs and/or triplets by calling ```model.plot_all()```. By default, the features are visualised in triplets, but pairs of features can be visualised by adding ```plot_pairs``` equal to True to the method call e.g. ```model.plot_all(plot_pairs=True)```. These visualisation were what deemed the use of the featurse curtosis, skewness and variance to train the model (this triplet had the greatest distinction between forged and not forged). 
 
-Example usage of the ForgeryDetector object can be found in ```main.py```.
+**Helpful tips:**
+* Example usage of the ForgeryDetector object can be found in ```main.py```.
+* To zoom in & out of the various plots, right-click, hold and drag to adjust the zoom.
 
 ### Training & Testing
 
@@ -60,11 +62,11 @@ The test data can be:
 
 The primary methods that can be used:
 * ```ForgeryDetector(filename, header=None, train_split=0.5)``` - constructs a new ForgeryDetector object, with the data set's filename, indicator of whether the data set has headers, and the proportion of the data split and used for training
-* ```load_data_set(self, filename, header)``` - loads a data set and configures it for use, useful to switch to another data set (the model will need to be retrained); done automatically when creating a new instance of the object
-* ```plot_all(self, plot_pairs=False)``` - plots all triplets of features to show variance, set ```plot_pairs``` to True to plot pairs of features
-* ```train_and_test(self, test=True)``` - trains the SVM with provided data set and trains it to determine its accuracy, though testing can be skipped by setting ```test``` to False
-* ```predict(self, test_data)``` - returns array of predicted results, 1 if forged, 0 if not forged based on data provided
+* ```.load_data_set(filename, header)``` - loads a data set and configures it for use, useful to switch to another data set (the model will need to be retrained); done automatically when creating a new instance of the object
+* ```.plot_all(plot_pairs=False)``` - plots all triplets of features to show variance, set ```plot_pairs``` to True to plot pairs of features
+* ```.train_and_test(test=True)``` - trains the SVM with provided data set and trains it to determine its accuracy, though testing can be skipped by setting ```test``` to False
+* ```.predict(test_data)``` - returns array of predicted results, 1 if forged, 0 if not forged based on data provided
 
-It is recommended to use ```plot_all()``` and avoid using:
-* ```plot_two_features(self, features)``` - plots any two features of the data set using the features' column names
-* ```plot_three_features(self, features, plot_all=True, test_data=None)``` - plots any three features of the data set using the features' column names, it can also plot test data, predicted results and accuracy of SVM if ```plot_all``` is False and test data is provided
+It is recommended to use ```.plot_all()``` and avoid using:
+* ```.plot_two_features(features)``` - plots any two features of the data set using the features' column names
+* ```.plot_three_features(features, plot_all=True, test_data=None)``` - plots any three features of the data set using the features' column names, it can also plot test data, predicted results and accuracy of SVM if ```plot_all``` is False and test data is provided
